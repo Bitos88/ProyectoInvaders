@@ -9,6 +9,7 @@ import enum
 class Status(enum.Enum):
     viva = "viva"
     explotando = "explotando"
+    aterrizando = "aterrizando"
     muerta = "muerta"
 
 class Ship(Sprite):
@@ -38,6 +39,10 @@ class Ship(Sprite):
         self.rect = self.image.get_rect(x=x, y=y)
 
         self.status = Status.viva
+
+        #propiedades rotación
+
+        
 
     def imageLoad(self):
         listaNaves = []
@@ -83,13 +88,27 @@ class Ship(Sprite):
 
     def movement(self):
         teclas_pulsadas = pg.key.get_pressed()
-        if teclas_pulsadas[K_UP] and self.rect.top >= 0:
+        if teclas_pulsadas[K_UP] and self.rect.top >= 150:
             self.rect.y -= 5
         elif teclas_pulsadas[K_DOWN] and self.rect.bottom <= 800:
             self.rect.y += 5
         
         else:
             self.vy = 0
+
+    def aterrizando(self):
+
+        if self.rect.y < 300:
+            self.rect.y += 0.5
+            self.rect.x += 0.5
+            print(self.rect.y)
+        elif self.rect.y > 300:
+            self.rect.y -= 0.5
+            self.rect.x += 0.5
+            print(self.rect.y)
+        else:
+            pass
+
 
 
     def update(self):
@@ -99,4 +118,8 @@ class Ship(Sprite):
         if self.status == Status.viva:
             self.fireAnimation()
             self.movement()
+
+        if self.status == Status.aterrizando:
+            self.aterrizando()
+            self.fireAnimation()
             
