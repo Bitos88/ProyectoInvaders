@@ -10,6 +10,7 @@ class Status(enum.Enum):
     viva = "viva"
     explotando = "explotando"
     aterrizando = "aterrizando"
+    aterrizada = "aterrizada"
     muerta = "muerta"
 
 class Ship(Sprite):
@@ -38,7 +39,12 @@ class Ship(Sprite):
         self.image = self.imagenes[self.activeImage]
         self.rect = self.image.get_rect(x=x, y=y)
 
+        self.angulo = 0
+
         self.status = Status.viva
+
+        self.naveRotadaS = None
+        self.naveRotadaRect = None
 
         #propiedades rotación
 
@@ -99,27 +105,38 @@ class Ship(Sprite):
     def aterrizando(self):
 
         if self.rect.y < 300:
-            self.rect.y += 0.5
-            self.rect.x += 0.5
-            print(self.rect.y)
+            self.rect.y += 1
+            
         elif self.rect.y > 300:
-            self.rect.y -= 0.5
-            self.rect.x += 0.5
-            print(self.rect.y)
+            self.rect.y -= 1
+            
+        elif self.rect.x < 600:
+            self.rect.x += 2
+        elif self.rect.x >= 550:
+            self.status = Status.aterrizada
         else:
             pass
 
+    def rotando(self):
 
+        if self.angulo != 179:
+            self.angulo = (self.angulo + 1) % 180
+
+        self.centroNaveX = self.rect.centerx
+        self.centroNaveY = self.rect.centery
+
+        self.naveRotadaS = pg.transform.rotozoom(self.image, self.angulo, 1)
+        self.naveRotadaRect = self.naveRotadaS.get_rect(centerx = self.centroNaveX, centery = self.centroNaveY)
 
     def update(self):
         if self.status == Status.explotando:
             self.explosion()
-            print(self.status)
         if self.status == Status.viva:
             self.fireAnimation()
             self.movement()
 
         if self.status == Status.aterrizando:
             self.aterrizando()
-            self.fireAnimation()
+            #self.fireAnimation()
+            self.rotando()
             

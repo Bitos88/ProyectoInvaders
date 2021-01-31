@@ -13,28 +13,23 @@ class Planet(Sprite):
         self.vx = vx
         self.image = pg.image.load("images/planeta.png")
         
-        self.centerx = 841 // 2
-        self.centery = 827 // 2
         
         self.rect = self.image.get_rect(center = (x, y))
 
         self.angle = 0
 
-        #self.planetaRot, self.planetaRotRect = rotate(self.image, self.angle)
 
+    def rotando(self, screen):
+        self.angle = (self.angle + 1) %360   
+        self.centerx = 841 // 2
+        self.centery = 827 // 2
 
-    '''    
-    def rotate(self, surface, angle):
-        rotatedSurface = pg.transform.rotozoom(surface, angle, 1)
-        rotatedRect = rotatedSurface.get_rect(center = (x, y))
-        return rotatedSurface, rotatedRect
-    '''
+        self.planetaRot = pg.transform.rotozoom(self.image, self.angle, 1)
+        self.planetRect = self.planetaRot.get_rect(centerx = self.centerx, centery = self.centery)
+        self.screen.blit(self.planetaRot (self.planetRect.x, self.planetRect.y))
+
 
     def update(self):
-
-        self.angle += 1
-
-
 
         self.rect.x -= self.vx
 
