@@ -15,7 +15,7 @@ class Menu(Sprite):
         self.vy = vy
         self.puntuacion = puntuacion
 
-        self.image = pg.image.load("images/UI.png")
+        self.image = pg.image.load("images/UI2.png")
         self.rect = self.image.get_rect(x= x, y= y)
 
 

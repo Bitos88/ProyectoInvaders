@@ -15,7 +15,7 @@ class Status(enum.Enum):
 
 class Ship(Sprite):
 
-    shipsList = ["navep1.png", "navep2.png", "navep3.png", "navep4.png", "navep5.png"]
+    shipsList = ["nave1.png", "nave2.png", "nave3.png", "nave4.png", "nave5.png"]
     explosionList = ["explosion00.png", "explosion01.png", "explosion02.png", "explosion03.png", "explosion04.png", "explosion05.png", "explosion06.png", "explosion07.png",]
     retardo_animaciones = 2
     retardo_animacionesE = 5
@@ -45,7 +45,7 @@ class Ship(Sprite):
         self.naveRotadaS = None
         self.naveRotadaRect = None
 
-        
+        self.musicaExplosión = pg.mixer.music.load("images/explosion.mp3")
 
     def imageLoad(self):
         listaNaves = []
@@ -98,9 +98,9 @@ class Ship(Sprite):
         elif self.rect.y > 300:
             self.rect.y -= 1
             
-        elif self.rect.x < 600:
+        elif self.rect.x < 630:
             self.rect.x += 2
-        elif self.rect.x >= 601:
+        elif self.rect.x >= 610:
             self.status = Status.aterrizada
             #print(self.status)
         else:

@@ -3,12 +3,14 @@ import pygame.locals
 import random
 import sys, os
 from Space import basededatos
+from Space import satelites
 from Space import DIMENSIONS, FPS
 from Space import ship
 from Space import meteors
 from Space import planet
 from Space import menu
 from Space import text
+from Space import musica
 from pygame.sprite import Sprite
 import time
 import enum
@@ -18,7 +20,7 @@ import enum
 
 
 pg.init()
-
+pg.mixer.init()
 class Estado(enum.Enum):
     inicio = "inicio"
     partida = "partida"
@@ -46,7 +48,6 @@ class Game(Sprite):
         self.textoTitulo = pg.font.Font("images/spaceage.ttf", 50)
         self.pointText = pg.font.Font("images/BungeeRegular.ttf", 45)
 
-
         self.background_x = 0
         self.puntuacion = 0
         self.meteorsDodge = 0
@@ -54,6 +55,8 @@ class Game(Sprite):
         #Instancias de los objetos
         self.meteor1 = meteors.Meteor(DIMENSIONS[0] + 32, random.randint(0, DIMENSIONS[1] - 32))
         self.meteoritos = pg.sprite.Group()
+        self.satelite1 = satelites.Satelite(DIMENSIONS[0] + 32, random.randint(0, DIMENSIONS[1] - 32))
+        self.satelites = pg.sprite.Group()
         self.naves = pg.sprite.Group(ship.Ship(1,500,5))
         self.navesPosX = 1
         self.navesPosY = 500
@@ -61,7 +64,8 @@ class Game(Sprite):
         self.menu = menu.Menu(0, -100, 0.5, self.puntuacion)
 
 
-        self.maxMeteo = 2
+        self.maxMeteo = 3
+        self.maxSat = 5
         #control de tiempo y reloj
         self.ct = 0
         self.clock = pg.time.Clock()
@@ -87,7 +91,7 @@ class Game(Sprite):
         
 
         #fondo0
-        self.bg1 = pg.image.load("images/fondo1_2.png")
+        self.bg1 = pg.image.load("images/fondo1_2-3.png")
         self.dimensionsBg1 = self.bg1.get_rect()
         self.bgx1 = 0.5
 
@@ -102,9 +106,23 @@ class Game(Sprite):
         self.puntuacion = 0
         self.meteorsDodge = 0
         self.vidas = 3
+        self.maxMeteo = 3
+        self.maxSat = 5
         self.partida = True
         self.partida2 = True
+        self.instructions = True
+        self.gameover = True
+        self.end = True
         self.inicio = False
+
+    def resetTotal2(self):
+        self.background_x = 0
+        self.puntuacion = 0
+        self.meteorsDodge = 0
+        self.vidas = 3
+        self.partida = False
+        self.partida2 = True
+        self.inicio = True
         self.instructions = True
         self.gameover = True
         self.end = True
@@ -127,13 +145,15 @@ class Game(Sprite):
     def reset(self):
         self.meteoritos.empty()
 
+    def resetSat(self):
+        self.satelites.empty()
+
     def mainLoop(self):
 
         start = False
 
         while not start:
 
-            #pg.mixer.music.play()
             
             while not self.partida:
                 dt = self.clock.tick(FPS)
@@ -165,23 +185,24 @@ class Game(Sprite):
                         self.meteoritos.remove(meteor)
                         self.meteorsDodge += 1
                         self.puntuacion += 50
-                        self.SPuntuacion = self.pointText.render(f":{self.meteorsDodge}", True, (255,255,255))
-                        self.Spunt = self.pointText.render(f":{self.puntuacion}", True, (255,255,255))
+                        self.SPuntuacion = self.pointText.render(f":{self.meteorsDodge}", True, (84,232,255))
+                        self.Spunt = self.pointText.render(f":{self.puntuacion}", True, (84,232,255))
                         #self.RPuntuacion = self.SPuntuacion.get_rect(topleft=(130, 10))
                 #calcula la colisión de 2 grupos de sprites, nave y meteo, y si detecta colisión elimina el meteorito
-                if self.puntuacion < 500:
+                if self.meteorsDodge < 15:
                     if pg.sprite.groupcollide(self.naves, self.meteoritos, False, True):
                         for nave in self.naves:
                             nave.status = ship.Status.explotando
                             self.vidas -= 1
                         self.puntuacion -= 25
                         self.reset()
-                self.Spunt = self.pointText.render(f":{self.puntuacion}", True, (255,255,255))
-                self.SPuntuacion = self.pointText.render(f":{self.meteorsDodge}", True, (255,255,255))
+                        pg.mixer.music.play()
+                self.Spunt = self.pointText.render(f":{self.puntuacion}", True, (84,232,255))
+                self.SPuntuacion = self.pointText.render(f":{self.meteorsDodge}", True, (84,232,255))
 
     
                 #mira si la puntuación a llegado al limite y saca el planeta por la parte derecha y elimina los meteoritos    
-                if self.puntuacion >= 500:
+                if self.meteorsDodge >= 15:
                     self.maxMeteo = 0
                     for meteor in self.meteoritos:
                         if meteor.rect.x < -80:
@@ -249,19 +270,12 @@ class Game(Sprite):
                 if self.vidas == 0:
                     self.partida = True
                     self.gameover = False
+                    nave.status = ship.Status.viva
+                    #self.resetTotal() #<----- a prueba
                     
                     
                 
                 tecla = pg.key.get_pressed()
-                '''
-                if tecla[pg.K_SPACE]:
-                    self.inicio = True
-                    self.partida = True
-                    self.partida2 = False
-                    nave.reset()
-                    self.planeta1.reset()
-                    nave.status = ship.Status.viva
-                '''        
 
 
 
@@ -289,46 +303,55 @@ class Game(Sprite):
                                 self.recordIntroducido = True
                             if event.key == pg.K_r:
                                 self.end = False
+                            if event.key == pg.K_n:
+                                self.partida2 = True
+                                self.end = True
+                                self.resetTotal()
+                                self.inicio = False
+                            if event.key == pg.K_e:
+                                pg.quit()
+                                sys.exit()
                             
                         
                 #movimiento original fondo pantalla
                 self.bgMove1()  
             
-                self.maxMeteo = 2
+                self.maxSat = 5
                 #mete en el grupo de sprites de Meteoritos la cantidad de meteoritos max expecificada.
-                if self.ct >= 2000 and self.puntuacion <= 800:
+                if self.ct >= 2000 and self.meteorsDodge <= 30:
 
-                    for x in range(self.maxMeteo):
-                        self.meteoritos.add(meteors.Meteor(DIMENSIONS[0] - 32, random.randint(150, DIMENSIONS[1] - 32)))
+                    for x in range(self.maxSat):
+                        self.satelites.add(satelites.Satelite(DIMENSIONS[0] - 32, random.randint(150, DIMENSIONS[1] - 32)))
                     self.ct = 0    
 
                 #va mostrando en pantalla los meteoritos y los elimina si pasan de cierta posición en pantalla
-                for meteor in self.meteoritos:
-                    self.screen.blit(meteor.image, (meteor.rect.x, meteor.rect.y))
+                for satelite in self.satelites:
+                    self.screen.blit(satelite.image, (satelite.rect.x, satelite.rect.y))
 
-                    if meteor.rect.x < -meteor.rect.w:
-                        self.meteoritos.remove(meteor)
+                    if satelite.rect.x < -satelite.rect.w:
+                        self.satelites.remove(satelite)
                         self.meteorsDodge += 1
                         self.puntuacion += 50
-                        self.SPuntuacion = self.pointText.render(f":{self.meteorsDodge}", True, (255,255,255))
+                        self.SPuntuacion = self.pointText.render(f":{self.meteorsDodge}", True, (84,232,255))
                         #self.RPuntuacion = self.SPuntuacion.get_rect(topleft=(130, 10))
                 #calcula la colisión de 2 grupos de sprites, nave y meteo, y si detecta colisión elimina el meteorito
-                if self.puntuacion < 800:
-                    if pg.sprite.groupcollide(self.naves, self.meteoritos, False, True):
+                if self.meteorsDodge < 30:
+                    if pg.sprite.groupcollide(self.naves, self.satelites, False, True):
                         for nave in self.naves:
                             nave.status = ship.Status.explotando
                             self.vidas -= 1
+                        pg.mixer.music.play()
                         self.puntuacion -= 25
-                        self.reset()
-                self.Spunt = self.pointText.render(f":{self.puntuacion}", True, (255,255,255))
+                        self.resetSat()
+                self.Spunt = self.pointText.render(f":{self.puntuacion}", True, (84,234,255))
    
                 #mira si la puntuación a llegado al limite y saca el planeta por la parte derecha y elimina los meteoritos    
-                if self.puntuacion >= 800:
-                    self.maxMeteo = 0
+                if self.meteorsDodge >= 30:
+                    self.maxSat = 0
                     self.puntuacion += 0 #<------ a prueba
-                    for meteor in self.meteoritos:
-                        if meteor.rect.x < -80:
-                            self.meteoritos.remove(meteor)
+                    for satelite in self.satelites:
+                        if satelite.rect.x < -80:
+                            self.satelites.remove(satelite)
                             
                     nave.status = ship.Status.aterrizando                      
                     self.planeta1.update()
@@ -343,7 +366,7 @@ class Game(Sprite):
                 self.screen.blit(self.menu.image, (self.menu.rect.x, self.menu.rect.y))
 
                 self.menu.update()
-                self.meteoritos.update()
+                self.satelites.update()
                 self.naves.update()
 
 
@@ -367,6 +390,7 @@ class Game(Sprite):
                 if self.vidas == 0:
                     self.partida2 = True
                     self.gameover = False
+                    nave.status = ship.Status.viva
 
                 if nave.status == ship.Status.aterrizada:
 
@@ -378,13 +402,14 @@ class Game(Sprite):
 
                     textofin = self.textoTitulo.render("GAME COMPLETE", True, (255,255,255))
                     textofinRect = textofin.get_rect(center=(self.dimensionsBg1.centerx //4, 200))
-                    textoScore = self.textoTitulo.render(f"TU PUNTUACIÓN ES DE: {self.puntuacion}", True, (255,255,255))
+                    textoScore = self.textoTitulo.render(f"YOUR SCORE: {self.puntuacion}", True, (255,255,255))
                     textoScoreRect = textoScore.get_rect(center=(self.dimensionsBg1.centerx //4, 300))
-                    textoAlias = self.textoTitulo.render("INTRODUCE TU ALIAS", True, (255,255,255))
+                    textoAlias = self.textoTitulo.render("ENTER YOUR ALIAS", True, (255,255,255))
                     textoAliasRect = textoAlias.get_rect(center=(self.dimensionsBg1.centerx//4, 400))
                     self.screen.blit(textofin, (textofinRect.x, textofinRect.y))
                     self.screen.blit(textoScore, (textoScoreRect.x, textoScoreRect.y))
                     self.screen.blit(textoAlias,(textoAliasRect.x, textoAliasRect.y))
+                    textoavance = text.Text(self.screen, "titulo", 25, "PRESS R TO RECORDS", self.screenRect.centerx, 700).imprimir(self.screen)
                     if not self.listaAlias:
                         textoLetras = self.textoTitulo.render(self.DictAlias[self.LetraElegida], True, (255,255,255))
                         textoLetrasRect = textoLetras.get_rect(center=((self.dimensionsBg1.centerx//4)-50, 500))
@@ -401,7 +426,7 @@ class Game(Sprite):
                             textoLetrasRect = textoLetras.get_rect(center=((self.dimensionsBg1.centerx//4)-50, 500))
                             self.screen.blit(textoLetras, ((textoLetrasRect.x) + x, textoLetrasRect.y))
                         else:
-                            textograbado = self.textoTitulo.render("PUNTUACIÓN GUARDADA", True, (255,0,0))
+                            textograbado = self.textoTitulo.render("SCORE RECORDED", True, (255,0,0))
                             textograbadoRect = textograbado.get_rect(center=(self.dimensionsBg1.centerx//4, 600))
                             self.screen.blit(textograbado, (textograbadoRect.x, textograbadoRect.y))  
 
@@ -410,17 +435,17 @@ class Game(Sprite):
                 if self.end == False:
                     self.screen.fill((0,0,0))
 
-                    textoRecords = self.textoTitulo.render("RECORDS", True, (0,0,255))
+                    textoRecords = self.textoTitulo.render("RECORDS", True, (84,232,255))
                     textoRecordsRect = textoRecords.get_rect(center=(self.screenRect.centerx, 150))
                     self.screen.blit(textoRecords, (textoRecordsRect.x, textoRecordsRect.y))
-                    tituloPuntuacion = self.texto.render("PUNTUACIÓN", True, (255,255,255))
-                    tituloPuntuacionRect = tituloPuntuacion.get_rect(center= (450,300))
+                    tituloPuntuacion = self.texto.render("SCORE", True, (255,255,255))
+                    tituloPuntuacionRect = tituloPuntuacion.get_rect(center= (500,300))
                     self.screen.blit(tituloPuntuacion, (tituloPuntuacionRect.x, tituloPuntuacionRect.y))
-                    nombrePuntuacion = self.texto.render("NOMBRE", True, (255,255,255))
-                    nombrePuntuacionRect = nombrePuntuacion.get_rect(center= (650,300))
+                    nombrePuntuacion = self.texto.render("NAME", True, (255,255,255))
+                    nombrePuntuacionRect = nombrePuntuacion.get_rect(center= (700,300))
                     self.screen.blit(nombrePuntuacion, (nombrePuntuacionRect.x, nombrePuntuacionRect.y))                
-
-
+                    textoReturn = text.Text(self.screen, "subtitulo", 30, "PRESS N TO NEW GAME", 230, 650).imprimir(self.screen)
+                    textoEnd = text.Text(self.screen, "subtitulo", 30, "PRESS E PARA SALIR", 920, 650).imprimir(self.screen)
 
 
                     records = basededatos.elegirDatos()  #contiene una lista de tuplas con los 3 records más altos
@@ -429,13 +454,13 @@ class Game(Sprite):
                     y2 = 0
                     for record in records:
                         recordsPlayer = self.texto.render(f"{record[0]}", True, (255,255,255))
-                        recordsPlayerRect = recordsPlayer.get_rect(center= (450,400 + y))
+                        recordsPlayerRect = recordsPlayer.get_rect(center= (500,400 + y))
                         self.screen.blit(recordsPlayer, (recordsPlayerRect.x , recordsPlayerRect.y))
                         y += 50
                         
                     for nombre in records:
                         puntuacionPlayer = self.texto.render(f"{nombre[1]}", True, (255,255,255))
-                        puntuacionPlayerRect = puntuacionPlayer.get_rect(center= (650,400 + y2))
+                        puntuacionPlayerRect = puntuacionPlayer.get_rect(center= (700,400 + y2))
                         self.screen.blit(puntuacionPlayer, (puntuacionPlayerRect.x , puntuacionPlayerRect.y))
                         y2 += 50
 
@@ -460,12 +485,13 @@ class Game(Sprite):
                 self.screen.fill((0,0,0))
 
                 textogameover = text.Text(self.screen, "titulo", 80,"GAME OVER", self.screenRect.centerx, self.screenRect.centery).imprimir(self.screen)
-                textoagain = text.Text(self.screen, "titulo", 20, "Pulsa R para volver a Inicio", 250, 700).imprimir(self.screen)
-                textosalir = text.Text(self.screen, "titulo", 20, "Pulsa E para cerrar", 950, 700).imprimir(self.screen)
+                textoagain = text.Text(self.screen, "titulo", 20, "PRESS R TO MAIN MENU", 250, 700).imprimir(self.screen)
+                textosalir = text.Text(self.screen, "titulo", 20, "PRESS E FOR CLOSE", 950, 700).imprimir(self.screen)
 
                 pg.display.flip()
         
             while not self.inicio:
+                #cancionInicio = musica.Musica("inicio").playMusic()
                 dt = self.clock.tick(FPS)
                 self.ct += dt
                 events = pg.event.get()
@@ -473,19 +499,20 @@ class Game(Sprite):
                     if event.type == pg.QUIT:
                         pg.quit()
                         sys.exit()
-
+                    if event.type == pg.KEYDOWN:
+                        if event.key == pg.K_SPACE:
+                            self.inicio = True
+                            self.partida2 = True
+                            self.partida = False
+                        if event.key == pg.K_f:
+                            self.instructions = False
+                            self.partida = True
+                            self.partida2 = True
+                            self.inicio = True
                 
-
                 tecla = pg.key.get_pressed()
 
-                if tecla[pg.K_SPACE]:
-                    self.inicio = True
-                    self.partida = False
-                elif tecla[pg.K_f]:
-                    self.instructions = False
-                    self.partida = True
-                    self.partida2 = True
-                    self.inicio = True
+                
 
 
                 
@@ -527,11 +554,12 @@ class Game(Sprite):
 
                 self.screen.fill((0,0,0))
 
-                textoprueba = text.Text(self.screen, "subtitulo", 30,"lo lograste", self.screenRect.centerx, self.screenRect.centery).imprimir(self.screen)
-
-                textoInstrucciones = text.Text(self.screen, "titulo", 25, "INSTRUCCIONES DEL JUEGO",self.screenRect.centerx, 200).imprimir(self.screen)
-                textoVolverInicio = text.Text(self.screen, "subtitulo", 25, "PULSA R PARA VOLVER", self.screenRect.centerx, 650).imprimir(self.screen)
-                
+                #textoprueba = text.Text(self.screen, "subtitulo", 30,"YOU GOT IT", self.screenRect.centerx, self.screenRect.centery).imprimir(self.screen)
+                imagen = pg.image.load("images/Tutorial.png")
+                imagenRect = imagen.get_rect(center = (self.screenRect.centerx, self.screenRect.centery))
+                textoInstrucciones = text.Text(self.screen, "titulo", 35, "GAME INSTRUCTIONS",self.screenRect.centerx, 100).imprimir(self.screen)
+                textoVolverInicio = text.Text(self.screen, "subtitulo", 25, "PRESS R TO MAIN SCREEN", self.screenRect.centerx, 650).imprimir(self.screen)
+                self.screen.blit(imagen, (275, 150))
                 pg.display.flip()
 
         

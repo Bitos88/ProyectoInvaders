@@ -1,4 +1,4 @@
-# SPACES INVADERS INSTALL INSTRUCTIONS
+# SPACES INVADERS INSTRUCCIONES DE INSTALACIÓN
 
 1. Acceder a la consola e introducir pip install pygame para instalarlo en la máquina
 2. En la consola introducir main.py para iniciar el juego o hacer click en el enlace y pulsar el botón de play en VSC situado en la esquina superior derecha
