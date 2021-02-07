@@ -8,17 +8,17 @@ fuentes = {
 }
 
 class Text():
-    def __init__(self, tipografia, tamaño, texto, x, y):
-
+    def __init__(self, pantalla, tipografia, tamaño, texto, x, y):
         self.x = x
         self.y = y
-
+        self.pantalla = pantalla
         self.tamaño = tamaño
-        self.texto = texto
+        self.texto2 = texto
 
         self.texto = pg.font.Font(f"images/{fuentes[tipografia]}", self.tamaño)
         
 
-    def imprimir(self):
-        self.render = self.text.render(f"{self.texto}", True, (255,255,255))
-        self.rect = self.render.get_rect(topleft= (self.x, self.y))
+    def imprimir(self, pantalla):
+        self.render = self.texto.render(self.texto2, True, (255,255,255))
+        self.rect = self.render.get_rect(center= (self.x , self.y))
+        self.pantalla.blit(self.render, (self.rect.x, self.rect.y))

@@ -23,9 +23,8 @@ class Ship(Sprite):
 
         pg.sprite.Sprite.__init__(self)
 
-        #self.x = x
-        #self.y = y
         self.vy = vy
+
         self.activeImage = 0
         self.activeImageE = 0
         self.imagenes = self.imageLoad()
@@ -45,8 +44,6 @@ class Ship(Sprite):
 
         self.naveRotadaS = None
         self.naveRotadaRect = None
-
-        #propiedades rotación
 
         
 
@@ -83,15 +80,6 @@ class Ship(Sprite):
                 self.status = Status.viva
         self.image = self.imagenesExplosion[self.activeImageE]
 
-        #CREAR TEXTO VIDAS
-
-
-    '''
-    @property
-    def rect(self):
-        return self.image.get_rect(topleft=(self.x, self.y))
-    '''
-
     def movement(self):
         teclas_pulsadas = pg.key.get_pressed()
         if teclas_pulsadas[K_UP] and self.rect.top >= 150:
@@ -112,8 +100,9 @@ class Ship(Sprite):
             
         elif self.rect.x < 600:
             self.rect.x += 2
-        elif self.rect.x >= 550:
+        elif self.rect.x >= 601:
             self.status = Status.aterrizada
+            #print(self.status)
         else:
             pass
 
@@ -128,6 +117,11 @@ class Ship(Sprite):
         self.naveRotadaS = pg.transform.rotozoom(self.image, self.angulo, 1)
         self.naveRotadaRect = self.naveRotadaS.get_rect(centerx = self.centroNaveX, centery = self.centroNaveY)
 
+    def reset(self):
+        self.rect.x = 1
+        self.angulo = 0
+        
+
     def update(self):
         if self.status == Status.explotando:
             self.explosion()
@@ -139,4 +133,4 @@ class Ship(Sprite):
             self.aterrizando()
             #self.fireAnimation()
             self.rotando()
-            
+     

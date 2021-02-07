@@ -20,3 +20,8 @@ class Meteor(Sprite):
     def update(self):
         self.rect.x -= self.speed
 
+
+
+
+
+

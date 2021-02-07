@@ -28,6 +28,10 @@ class Planet(Sprite):
         self.planetRect = self.planetaRot.get_rect(centerx = self.centerx, centery = self.centery)
         self.screen.blit(self.planetaRot (self.planetRect.x, self.planetRect.y))
 
+    def reset(self):
+        self.rect.x = 2100
+        self.vx = 4
+        
 
     def update(self):
 
