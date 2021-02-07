@@ -154,8 +154,50 @@ class Game(Sprite):
 
         while not start:
 
-            
-            while not self.partida:
+            while not self.inicio:
+                dt = self.clock.tick(FPS)
+                self.ct += dt
+                events = pg.event.get()
+                for event in events:
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.KEYDOWN:
+                        if event.key == pg.K_SPACE:
+                            self.inicio = True
+                            #self.partida2 = True
+                            self.partida = False
+                        if event.key == pg.K_f:
+                            self.instructions = False
+                            #self.partida = True
+                            #self.partida2 = True
+                            self.inicio = True
+                
+                #tecla = pg.key.get_pressed()
+
+                
+
+
+                
+
+                self.bgMove1()
+
+                textoTitulo = self.textoTitulo.render("SPACE INVADERS", True, (255,255,255))
+                textoTituloRect = textoTitulo.get_rect(center=(self.dimensionsBg1.centerx //4, 200))
+
+                textoInicio = self.textoTitulo.render("Press Space To Start", True, (255,255,255))
+                textoInicioRect = textoInicio.get_rect(center=(self.dimensionsBg1.centerx //4, self.dimensionsBg1.centery))
+
+                textoInstruct = self.texto.render("Press F for instructions", True, (255,255,255))
+                textoInstructRect = textoInstruct.get_rect(x=100, y=700)
+                
+                self.screen.blit(textoTitulo, (textoTituloRect.x, textoTituloRect.y))
+                self.screen.blit(textoInicio, (textoInicioRect.x, textoInicioRect.y))
+                self.screen.blit(textoInstruct, (textoInstructRect.x, textoInstructRect.y))
+
+                pg.display.flip()
+
+            while not self.instructions:
                 dt = self.clock.tick(FPS)
                 self.ct += dt
                 events = pg.event.get()
@@ -164,6 +206,35 @@ class Game(Sprite):
                         pg.quit()
                         sys.exit()
 
+
+                tecla = pg.key.get_pressed()
+
+                if tecla[pg.K_r]:
+                    self.inicio = False
+                    self.partida = True
+                    self.instructions = True
+                
+
+                self.screen.fill((0,0,0))
+
+                #textoprueba = text.Text(self.screen, "subtitulo", 30,"YOU GOT IT", self.screenRect.centerx, self.screenRect.centery).imprimir(self.screen)
+                imagen = pg.image.load("images/Tutorial.png")
+                imagenRect = imagen.get_rect(center = (self.screenRect.centerx, self.screenRect.centery))
+                textoInstrucciones = text.Text(self.screen, "titulo", 35, "GAME INSTRUCTIONS",self.screenRect.centerx, 100).imprimir(self.screen)
+                textoVolverInicio = text.Text(self.screen, "subtitulo", 25, "PRESS R TO MAIN SCREEN", self.screenRect.centerx, 650).imprimir(self.screen)
+                self.screen.blit(imagen, (275, 150))
+                pg.display.flip()
+
+
+            while not self.partida:
+                dt = self.clock.tick(FPS)
+                self.ct += dt
+                events = pg.event.get()
+                for event in events:
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    
                 
                 
                 #movimiento original fondo pantalla
@@ -256,7 +327,7 @@ class Game(Sprite):
                     textolevel2Rect = textolevel2.get_rect(center=(self.dimensionsBg1.centerx //4, 400))
                     self.screen.blit(textolevel2, (textolevel2Rect.x, textolevel2Rect.y))
                     self.screen.blit(textolevel, (textolevelRect.x, textolevelRect.y))
-
+                    
                     tecla = pg.key.get_pressed()
 
                     if tecla[pg.K_SPACE]:
@@ -304,10 +375,10 @@ class Game(Sprite):
                             if event.key == pg.K_r:
                                 self.end = False
                             if event.key == pg.K_n:
-                                self.partida2 = True
-                                self.end = True
+                                #self.partida2 = True
+                                #self.end = True
                                 self.resetTotal()
-                                self.inicio = False
+                                #self.inicio = False
                             if event.key == pg.K_e:
                                 pg.quit()
                                 sys.exit()
@@ -490,6 +561,7 @@ class Game(Sprite):
 
                 pg.display.flip()
         
+            '''
             while not self.inicio:
                 #cancionInicio = musica.Musica("inicio").playMusic()
                 dt = self.clock.tick(FPS)
@@ -561,7 +633,7 @@ class Game(Sprite):
                 textoVolverInicio = text.Text(self.screen, "subtitulo", 25, "PRESS R TO MAIN SCREEN", self.screenRect.centerx, 650).imprimir(self.screen)
                 self.screen.blit(imagen, (275, 150))
                 pg.display.flip()
-
+            '''
         
 
 
