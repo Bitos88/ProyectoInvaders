@@ -22,9 +22,9 @@ def datosDB(puntuacion, nombre):
 
 def elegirDatos():
     cursor.execute('''SELECT * FROM records ORDER BY puntuacion DESC''')
-    records = []
-    for x in range(3):
-        records.append(cursor.fetchone())
+    records = cursor.fetchall()
+    #for x in range(3):
+        #records.append(cursor.fetchone())
     conexion.commit()
     #cursor.close()
 
